@@ -1,0 +1,76 @@
+name: "Continuous integration"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  continuous-integration:
+    name: "Check with PHP ${{ matrix.php-version }}"
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php-version: "8.2" }
+          - { php-version: "8.5" }
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Setup PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php-version }}"
+          tools: "composer, cs2pr"
+
+      # Install dependencies
+      - name: "Get cache variables"
+        id: "cache-variables"
+        run: |
+          echo "composer=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: "Cache dependencies"
+        uses: actions/cache@v4
+        with:
+          path: "${{ steps.cache-variables.outputs.composer }}"
+          key: "dependencies-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}"
+          restore-keys: |
+            dependencies-${{ matrix.php-version }}-
+            dependencies-
+      - name: "Force used PHP version"
+        run: |
+          composer config --unset platform.php --ansi
+          composer require "php:>=${{ matrix.php-version }}" --ansi --ignore-platform-req=php+ --no-install --no-scripts
+      - name: "Install and build dependencies"
+        run: |
+          composer install --ansi --ignore-platform-req=php+ --no-interaction --no-progress
+
+      # Lint
+      - name: "Validate composer config"
+        if: ${{ !cancelled() }}
+        run: |
+          composer validate --strict
+      - name: "PHP Parallel Lint"
+        if: ${{ !cancelled() }}
+        run: |
+          vendor/bin/parallel-lint --exclude ./.git/ --exclude ./vendor/ --checkstyle . | cs2pr
+      - name: "PHP CS Fixer"
+        if: ${{ !cancelled() }}
+        run: |
+          vendor/bin/php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
+      - name: "PHPStan"
+        if: ${{ !cancelled() }}
+        run: |
+          vendor/bin/phpstan analyse --error-format=checkstyle | cs2pr
+
+      # Test
+      - name: "PHPUnit"
+        if: ${{ !cancelled() }}
+        run: |
+          vendor/bin/phpunit
