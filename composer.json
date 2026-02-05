@@ -1,0 +1,45 @@
+{
+    "name": "glpi-project/rector-glpi",
+    "type": "rector-extension",
+    "description": "Rector rules for GLPI.",
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "php": ">=8.2",
+        "rector/rector": "^2.3"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.93",
+        "php-parallel-lint/php-parallel-lint": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "RectorGlpi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ],
+        "psr-4": {
+            "RectorGlpi\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2.99"
+        },
+        "sort-packages": true,
+        "allow-plugins": {
+            "cweagans/composer-patches": false,
+            "rector/extension-installer": false
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

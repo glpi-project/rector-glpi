@@ -1,0 +1,7 @@
+services:
+  app:
+    image: "php:8.2-cli"
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    volumes:
+      - ".:/app:rw"
