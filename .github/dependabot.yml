@@ -11,6 +11,8 @@ updates:
     schedule:
       interval: "monthly"
     versioning-strategy: "increase"
+    allow:
+      - dependency-type: "development"
     groups:
       dev-dependencies:
         dependency-type: "development"
