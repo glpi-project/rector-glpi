@@ -1,4 +1,4 @@
-PHP = docker compose run --rm app
+PHP = docker compose run --remove-orphans --rm app
 
 # Helper variables
 _TITLE := "\033[32m[%s]\033[0m %s\n" # Green text
@@ -17,7 +17,7 @@ help: ## Show this help message
 ## —— Dependencies —————————————————————————————————————————————————————————————————————————————————
 composer: ## Run a composer command, e.g.: make composer c='require org/package'
 	@$(eval c ?=)
-	docker run --rm --interactive --tty --volume $PWD:/app --user $(id -u):$(id -g) --workdir /app composer $(c)
+	docker run --rm --interactive --tty --volume $$PWD:/app --user $(id -u):$(id -g) --workdir /app composer $(c)
 .PHONY: composer
 
 ## —— Code analysis ————————————————————————————————————————————————————————————————————————————————
