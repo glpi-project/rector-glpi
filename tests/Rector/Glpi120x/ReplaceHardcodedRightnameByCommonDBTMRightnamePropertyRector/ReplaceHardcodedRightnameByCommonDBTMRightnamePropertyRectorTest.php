@@ -8,7 +8,7 @@ use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 
-final class ReplaceCommonGlpiGetTypeByClassConstantRectorTest extends AbstractRectorTestCase
+final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRectorTest extends AbstractRectorTestCase
 {
     public static function provideData(): Iterator
     {

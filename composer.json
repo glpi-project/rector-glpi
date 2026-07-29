@@ -23,6 +23,7 @@
     },
     "autoload-dev": {
         "classmap": [
+            "stubs/",
             "tests/"
         ],
         "psr-4": {
