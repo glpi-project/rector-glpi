@@ -76,6 +76,7 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
 
     public function refactor(Node $node): ?Node
     {
+        // filtering $node to keep only Session::checkRight or Session::checkRightsOr, etc
         if (($node instanceof StaticCall) === false) {
             // It should not happen
             return null;
@@ -87,10 +88,11 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
         }
 
         if ($this->isNames($node->name, ['checkRight', 'checkRightsOr', 'haveRight', 'haveRightsAnd', 'haveRightsOr']) === false) {
-            // Process only gven methods
+            // Process only given methods
             return null;
         }
 
+        // filtering to keep only $node having a hardcoded string as $module argument
         $rightname_arg = null;
         foreach ($node->args as $index => $arg) {
             if (!($arg instanceof Arg)) {
@@ -108,6 +110,7 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
             return null;
         }
 
+        // Expected node (Session::checkXXX) with hardcoded string matched.
         $hardcoded_value = $rightname_arg->value->value;
 
         // @TODO Classnames using multiple uppercase letters in their name will not be found automatically.
@@ -115,13 +118,17 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
         // by scanning the GLPI/plugin `src` directories.
         $expected_class  = \ucfirst($hardcoded_value);
 
+        // first replacement try - guess the classname by capitalizing the rightname
         if (\is_a($expected_class, 'CommonGLPI', true) && $expected_class::$rightname === $hardcoded_value) {
-            // Hardcoded value matches a class name and the class rightname matches the hardcoded value,
-            // e.g. `"computer"` -> `Computer::$rightname`
+            // The guessed classname corresponds to an existing `CommonGLPI` class that declares the
+            // hardcoded value as its own rightname, e.g. `"computer"` -> `Computer::$rightname`.
+            // Comparing the rightname discards coincidental classname matches: `"rack"` guesses
+            // `Rack`, but `Rack::$rightname` is `datacenter`, so the value is left untouched.
             $rightname_arg->value = new StaticPropertyFetch(new Name('\\' . $expected_class), 'rightname');
             return $node;
         }
 
+        // second replacement try - look the rightname up in the manually curated mapping
         if (\array_key_exists($hardcoded_value, self::MAPPING) && self::MAPPING[$hardcoded_value] !== null) {
             // Hardcoded value matches a mapped value,
             // e.g. `"networking"` -> `NetworkPort::$rightname
