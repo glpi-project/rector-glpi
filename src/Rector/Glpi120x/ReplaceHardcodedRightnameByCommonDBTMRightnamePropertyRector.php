@@ -127,6 +127,19 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
             return null;
         }
 
+        // e.g. `"uninstall:profile"` -> `PluginUninstallProfile`.
+        if (\str_contains($hardcoded_value, ':')) {
+            [$plugin_part, $feature_part] = \explode(':', $hardcoded_value, 2);
+            $expected_class = 'Plugin' . self::toStudlyCase($plugin_part) . self::toStudlyCase($feature_part);
+
+            if (\is_a($expected_class, 'CommonGLPI', true) && $expected_class::$rightname === $hardcoded_value) {
+                $rightname_arg->value = new StaticPropertyFetch(new Name('\\' . $expected_class), 'rightname');
+                return $node;
+            }
+
+            return null;
+        }
+
         // @TODO Classnames using multiple uppercase letters in their name will not be found automatically.
         // A service using a logic similar to `DbUtils::fixItemtypeCase()` could be implemented to find the correct case,
         // by scanning the GLPI/plugin `src` directories.
@@ -151,5 +164,10 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
         }
 
         return null;
+    }
+
+    private static function toStudlyCase(string $value): string
+    {
+        return \str_replace(' ', '', \ucwords(\str_replace(['_', '-'], ' ', $value)));
     }
 }
