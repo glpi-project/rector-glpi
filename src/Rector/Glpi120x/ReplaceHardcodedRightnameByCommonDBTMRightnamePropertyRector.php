@@ -127,14 +127,22 @@ final class ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector extends
             return null;
         }
 
-        // e.g. `"uninstall:profile"` -> `PluginUninstallProfile`.
+        // e.g. `"uninstall:profile"` -> `PluginUninstallProfile` or `GlpiPlugin\Uninstall\Profile`.
         if (\str_contains($hardcoded_value, ':')) {
             [$plugin_part, $feature_part] = \explode(':', $hardcoded_value, 2);
-            $expected_class = 'Plugin' . self::toStudlyCase($plugin_part) . self::toStudlyCase($feature_part);
+            $studly_plugin  = self::toStudlyCase($plugin_part);
+            $studly_feature = self::toStudlyCase($feature_part);
 
-            if (\is_a($expected_class, 'CommonGLPI', true) && $expected_class::$rightname === $hardcoded_value) {
-                $rightname_arg->value = new StaticPropertyFetch(new Name('\\' . $expected_class), 'rightname');
-                return $node;
+            foreach (
+                [
+                    'Plugin' . $studly_plugin . $studly_feature,
+                    'GlpiPlugin\\' . $studly_plugin . '\\' . $studly_feature,
+                ] as $expected_class
+            ) {
+                if (\is_a($expected_class, 'CommonGLPI', true) && $expected_class::$rightname === $hardcoded_value) {
+                    $rightname_arg->value = new StaticPropertyFetch(new Name('\\' . $expected_class), 'rightname');
+                    return $node;
+                }
             }
 
             return null;
