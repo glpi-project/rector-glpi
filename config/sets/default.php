@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Rector\Config\RectorConfig;
 use RectorGlpi\Rector\Glpi120x\ReplaceCommonGlpiGetTypeByClassConstantRector;
 use RectorGlpi\Rector\Glpi120x\ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector;
+use RectorGlpi\Rector\Glpi120x\ReplaceSessionVariableByGetterRector;
 
 return static function (RectorConfig $rector_config): void {
     $glpi_directory = null;
@@ -51,5 +52,6 @@ return static function (RectorConfig $rector_config): void {
     if (\version_compare($glpi_version, '12.0.0-dev', '>=')) {
         $rector_config->rule(ReplaceCommonGlpiGetTypeByClassConstantRector::class);
         $rector_config->rule(ReplaceHardcodedRightnameByCommonDBTMRightnamePropertyRector::class);
+        $rector_config->rule(ReplaceSessionVariableByGetterRector::class);
     }
 };
