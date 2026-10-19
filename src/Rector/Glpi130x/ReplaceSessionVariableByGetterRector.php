@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RectorGlpi\Rector\Glpi120x;
+namespace RectorGlpi\Rector\Glpi130x;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;

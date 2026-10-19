@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RectorGlpi\Tests\Rector\Glpi120x\ReplaceSessionVariableByGetterRector;
+namespace RectorGlpi\Tests\Rector\Glpi130x\ReplaceSessionVariableByGetterRector;
 
 use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
