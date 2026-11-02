@@ -82,7 +82,7 @@ final class ReplaceCommonGlpiGetTypeByClassConstantRector extends AbstractRector
 
     private function isBetweeCurlyBracesInsideStringInterpolation(Node $node): bool
     {
-        $tokens = $this->file->getOldTokens();
+        $tokens = $this->getFile()->getOldTokens();
         $previous_token_pos = $node->getStartTokenPos() - 1;
         if (
             \array_key_exists($previous_token_pos, $tokens)
