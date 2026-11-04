@@ -39,8 +39,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: "${{ steps.cache-variables.outputs.composer }}"
-          key: "dependencies-${{ matrix.dependencies }}-${{ matrix.php-version }}"
+          key: "dependencies-${{ matrix.dependencies }}-${{ hashFiles('composer.json') }}-${{ matrix.php-version }}"
           restore-keys: |
+            dependencies-${{ matrix.dependencies }}-${{ hashFiles('composer.json') }}
             dependencies-${{ matrix.dependencies }}-
             dependencies-
       - name: "Force used PHP version"
@@ -49,13 +50,7 @@ jobs:
           composer require "php:>=${{ matrix.php-version }}" --ansi --ignore-platform-req=php+ --no-install --no-scripts
       - name: "Install and build dependencies"
         run: |
-          if [[ "${{ matrix.dependencies }}" = "lowest" ]]; then
-            composer update --ansi --ignore-platform-req=php+ --prefer-lowest --no-interaction --no-progress
-          elif [[ "${{ matrix.dependencies }}" = "highest" ]]; then
-            composer update --ansi --ignore-platform-req=php+ --no-interaction --no-progress
-          else
-            composer install --ansi --ignore-platform-req=php+ --no-interaction --no-progress
-          fi
+          composer update --ansi --ignore-platform-req=php+ ${{ case(matrix.dependencies == 'lowest', '--prefer-lowest', '') }} --no-interaction --no-progress
       # Lint
       - name: "Validate composer config"
         if: ${{ !cancelled() }}
