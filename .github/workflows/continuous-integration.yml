@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - { php-version: "8.2", dependencies: "lowest" }
-          - { php-version: "8.5", dependencies: "highest" }
+          - { php-version: "8.6", dependencies: "highest" }
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v7"
@@ -51,6 +51,7 @@ jobs:
       - name: "Install and build dependencies"
         run: |
           composer update --ansi --ignore-platform-req=php+ ${{ case(matrix.dependencies == 'lowest', '--prefer-lowest', '') }} --no-interaction --no-progress
+
       # Lint
       - name: "Validate composer config"
         if: ${{ !cancelled() }}
