@@ -18,8 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php-version: "8.2" }
-          - { php-version: "8.5" }
+          - { php-version: "8.2", dependencies: "lowest" }
+          - { php-version: "8.5", dependencies: "highest" }
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v7"
@@ -39,9 +39,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: "${{ steps.cache-variables.outputs.composer }}"
-          key: "dependencies-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}"
+          key: "dependencies-${{ matrix.dependencies }}-${{ matrix.php-version }}"
           restore-keys: |
-            dependencies-${{ matrix.php-version }}-
+            dependencies-${{ matrix.dependencies }}-
             dependencies-
       - name: "Force used PHP version"
         run: |
@@ -49,8 +49,13 @@ jobs:
           composer require "php:>=${{ matrix.php-version }}" --ansi --ignore-platform-req=php+ --no-install --no-scripts
       - name: "Install and build dependencies"
         run: |
-          composer install --ansi --ignore-platform-req=php+ --no-interaction --no-progress
-
+          if [[ "${{ matrix.dependencies }}" = "lowest" ]]; then
+            composer update --ansi --ignore-platform-req=php+ --prefer-lowest --no-interaction --no-progress
+          elif [[ "${{ matrix.dependencies }}" = "highest" ]]; then
+            composer update --ansi --ignore-platform-req=php+ --no-interaction --no-progress
+          else
+            composer install --ansi --ignore-platform-req=php+ --no-interaction --no-progress
+          fi
       # Lint
       - name: "Validate composer config"
         if: ${{ !cancelled() }}
